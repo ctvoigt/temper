@@ -1,6 +1,7 @@
 /*
- * pcsensor.c by Michitaka Ohno (c) 2011 (elpeo@mars.dti.ne.jp)
- * based oc pcsensor.c by Juan Carlos Perez (c) 2011 (cray@isp-sl.com)
+ * pcsensor.c by Fabio C. Barrionuevo da Luz (c) 2012 (bnafta at gmail dot com)
+ * based on pcsensor.c Michitaka Ohno (c) 2011 (elpeo@mars.dti.ne.jp)
+ * based on pcsensor.c by Juan Carlos Perez (c) 2011 (cray@isp-sl.com)
  * based on Temper.c by Robert Kavaler (c) 2009 (relavak.com)
  * All rights reserved.
  *
@@ -12,7 +13,7 @@
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY Juan Carlos Perez ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -23,7 +24,7 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
 
 
@@ -34,17 +35,19 @@
 #include <string.h>
 #include <errno.h>
 #include <float.h>
- 
- 
+#include <time.h>
+
+
+
 #define INTERFACE1 (0x00)
 #define INTERFACE2 (0x01)
 #define SUPPORTED_DEVICES (2)
- 
-const static unsigned short vendor_id[] = { 
+
+const static unsigned short vendor_id[] = {
 0x1130,
 0x0c45
 };
-const static unsigned short product_id[] = { 
+const static unsigned short product_id[] = {
 0x660c,
 0x7401
 };
@@ -61,15 +64,16 @@ const static char uCmd4[] = { 0x54,    0,    0,    0,    0,    0,    0,    0 };
 const static int reqIntLen=8;
 const static int reqBulkLen=8;
 const static int timeout=5000; /* timeout in ms */
- 
+
 static int debug=0;
 
 static int device_type(usb_dev_handle *lvr_winusb){
 	struct usb_device *dev;
-	int i;
+	int i = 0;
+
 	dev = usb_device(lvr_winusb);
 	for(i =0;i < SUPPORTED_DEVICES;i++){
-			if (dev->descriptor.idVendor == vendor_id[i] && 
+			if (dev->descriptor.idVendor == vendor_id[i] &&
 				dev->descriptor.idProduct == product_id[i] ) {
 				return i;
 			}
@@ -79,7 +83,7 @@ static int device_type(usb_dev_handle *lvr_winusb){
 
 static int usb_detach(usb_dev_handle *lvr_winusb, int iInterface) {
 	int ret;
- 
+
 	ret = usb_detach_kernel_driver_np(lvr_winusb, iInterface);
 	if(ret) {
 		if(errno == ENODATA) {
@@ -99,18 +103,18 @@ static int usb_detach(usb_dev_handle *lvr_winusb, int iInterface) {
 		}
 	}
 	return ret;
-} 
+}
 
-static usb_dev_handle *find_lvr_winusb() {
- 
+static usb_dev_handle *find_lvr_winusb(void) {
+
 	struct usb_bus *bus;
 	struct usb_device *dev;
-	int i;
- 
+	int i = 0;
+
 	for (bus = usb_busses; bus; bus = bus->next) {
 		for (dev = bus->devices; dev; dev = dev->next) {
-			for(i =0;i < SUPPORTED_DEVICES;i++){
-				if (dev->descriptor.idVendor == vendor_id[i] && 
+			for( i =0;i < SUPPORTED_DEVICES;i++){
+				if (dev->descriptor.idVendor == vendor_id[i] &&
 					dev->descriptor.idProduct == product_id[i] ) {
 					usb_dev_handle *handle;
 					if(debug) {
@@ -143,28 +147,28 @@ static usb_dev_handle* setup_libusb_access() {
 	usb_find_busses();
 	usb_find_devices();
 
- 
+
 	if(!(lvr_winusb = find_lvr_winusb())) {
 		if(debug){
 			printf("Couldn't find the USB device, Exiting\n");
 		}
 		return NULL;
 	}
-        
-        
+
+
 	usb_detach(lvr_winusb, INTERFACE1);
-        
+
 
 	usb_detach(lvr_winusb, INTERFACE2);
-        
- 
+
+
 	if (usb_set_configuration(lvr_winusb, 0x01) < 0) {
 		if(debug){
 			printf("Could not set configuration 1\n");
 		}
 		return NULL;
 	}
- 
+
 
 	// Microdia tiene 2 interfaces
 	if (usb_claim_interface(lvr_winusb, INTERFACE1) < 0) {
@@ -173,19 +177,20 @@ static usb_dev_handle* setup_libusb_access() {
 		}
 		return NULL;
 	}
- 
+
 	if (usb_claim_interface(lvr_winusb, INTERFACE2) < 0) {
 		if(debug){
 			printf("Could not claim interface\n");
 		}
 		return NULL;
 	}
- 
+
 	return lvr_winusb;
 }
- 
+
 static int ini_control_transfer(usb_dev_handle *dev) {
-	int r,i;
+	int r;
+	int i = 0;
 
 	char question[] = { 0x01,0x01 };
 
@@ -193,24 +198,24 @@ static int ini_control_transfer(usb_dev_handle *dev) {
 	if( r < 0 )
 	{
 		if(debug){
-			printf("USB control write"); 
+			printf("USB control write");
 		}
 		return -1;
 	}
 
 
 	if(debug) {
-		for (i=0;i<reqIntLen; i++) printf("%02x ",question[i] & 0xFF);
+		for ( i=0;i<reqIntLen; i++) printf("%02x ",question[i] & 0xFF);
 		printf("\n");
 	}
 	return 0;
 }
- 
-static int control_transfer(usb_dev_handle *dev, const char *pquestion) {
-	int r,i;
 
+static int control_transfer(usb_dev_handle *dev, const char *pquestion) {
+	int r;
+	int i = 0;
 	char question[reqIntLen];
-    
+
 	memcpy(question, pquestion, sizeof question);
 
 	r = usb_control_msg(dev, 0x21, 0x09, 0x0200, 0x01, (char *) question, reqIntLen, timeout);
@@ -223,18 +228,21 @@ static int control_transfer(usb_dev_handle *dev, const char *pquestion) {
 	}
 
 	if(debug) {
-		for (i=0;i<reqIntLen; i++) printf("%02x ",question[i]  & 0xFF);
+		for ( i=0;i<reqIntLen; i++) printf("%02x ", question[i]  & 0xFF);
 		printf("\n");
 	}
 	return 0;
 }
 
 static int interrupt_read(usb_dev_handle *dev) {
- 
-	int r,i;
+
+	int r;
+	int i = 0;
 	char answer[reqIntLen];
-	bzero(answer, reqIntLen);
-    
+	//bzero(answer, reqIntLen);
+    //(style) Found obsolete function 'bzero'. It is recommended that new applications use the 'memset' function
+    memset (answer,'0',reqIntLen);
+
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
 	{
@@ -245,19 +253,22 @@ static int interrupt_read(usb_dev_handle *dev) {
 	}
 
 	if(debug) {
-		for (i=0;i<reqIntLen; i++) printf("%02x ",answer[i]  & 0xFF);
-    
+		for ( i=0;i<reqIntLen; i++) printf("%02x ",answer[i]  & 0xFF);
+
 		printf("\n");
 	}
 	return 0;
 }
 
 static int interrupt_read_temperatura(usb_dev_handle *dev, float *tempC) {
- 
-	int r,i, temperature;
+
+	int r, temperature;
+		int i = 0;
 	char answer[reqIntLen];
-	bzero(answer, reqIntLen);
-    
+	//bzero(answer, reqIntLen);
+    //(style) Found obsolete function 'bzero'. It is recommended that new applications use the 'memset' function
+    memset (answer,'0',reqIntLen);
+
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
 	{
@@ -269,11 +280,11 @@ static int interrupt_read_temperatura(usb_dev_handle *dev, float *tempC) {
 
 
 	if(debug) {
-		for (i=0;i<reqIntLen; i++) printf("%02x ",answer[i]  & 0xFF);
-    
+		for ( i=0;i<reqIntLen; i++) printf("%02x ",answer[i]  & 0xFF);
+
 		printf("\n");
 	}
-    
+
 	temperature = (answer[3] & 0xFF) + (answer[2] << 8);
 	*tempC = temperature * (125.0 / 32000.0);
 	return 0;
@@ -285,11 +296,11 @@ static int get_data(usb_dev_handle *dev, char *buf, int len){
 
 static int get_temperature(usb_dev_handle *dev, float *tempC){
 	char buf[256];
-	int ret, temperature, i;
-
+	int ret, temperature;
+	int i = 0;
 	control_transfer(dev, uCmd1 );
 	control_transfer(dev, uCmd4 );
-	for(i = 0; i < 7; i++) {
+	for( i = 0; i < 7; i++) {
 		control_transfer(dev, uCmd0 );
 	}
 	control_transfer(dev, uCmd2 );
@@ -298,19 +309,20 @@ static int get_temperature(usb_dev_handle *dev, float *tempC){
 		return -1;
 	}
 
-	temperature = (buf[1] & 0xFF) + (buf[0] << 8);	
+	temperature = (buf[1] & 0xFF) + (buf[0] << 8);
 	*tempC = temperature * (125.0 / 32000.0);
 	return 0;
 }
 
-usb_dev_handle* pcsensor_open(){
+usb_dev_handle *pcsensor_open(){
 	usb_dev_handle *lvr_winusb = NULL;
 	char buf[256];
-	int i, ret;
+	int ret;
+		int i = 0;
 
 	if (!(lvr_winusb = setup_libusb_access())) {
 		return NULL;
-	} 
+	}
 
 	switch(device_type(lvr_winusb)){
 	case 0:
@@ -318,9 +330,9 @@ usb_dev_handle* pcsensor_open(){
 		control_transfer(lvr_winusb, uCmd3 );
 		control_transfer(lvr_winusb, uCmd2 );
 		ret = get_data(lvr_winusb, buf, 256);
-		if(debug){	
+		if(debug){
 			printf("Other Stuff (%d bytes):\n", ret);
-			for(i = 0; i < ret; i++) {
+			for( i = 0; i < ret; i++) {
 				printf(" %02x", buf[i] & 0xFF);
 				if(i % 16 == 15) {
 					printf("\n");
@@ -331,13 +343,13 @@ usb_dev_handle* pcsensor_open(){
 		break;
 	case 1:
 		ini_control_transfer(lvr_winusb);
-      
+
 		control_transfer(lvr_winusb, uTemperatura );
 		interrupt_read(lvr_winusb);
- 
+
 		control_transfer(lvr_winusb, uIni1 );
 		interrupt_read(lvr_winusb);
- 
+
 		control_transfer(lvr_winusb, uIni2 );
 		interrupt_read(lvr_winusb);
 		interrupt_read(lvr_winusb);
@@ -375,6 +387,58 @@ float pcsensor_get_temperature(usb_dev_handle* lvr_winusb){
 	return tempc;
 }
 
+typedef struct temperature {
+	float celsius;
+        float fahrenheit;
+	time_t time;
+	struct tm * localtime;
+
+
+} Temperature;
+
+extern float get_temperature_in_c(void){
+	usb_dev_handle* lvr_winusb = pcsensor_open();
+	if(!lvr_winusb) return -1;
+	float tempc = pcsensor_get_temperature(lvr_winusb);
+	pcsensor_close(lvr_winusb);
+	return tempc;
+
+}
+
+extern float get_temperature_in_f(void){
+	usb_dev_handle* lvr_winusb = pcsensor_open();
+	if(!lvr_winusb) return -1;
+	float tempc = pcsensor_get_temperature(lvr_winusb);
+	pcsensor_close(lvr_winusb);
+	return (9.0 / 5.0 * tempc + 32.0);
+
+}
+
+extern Temperature *get_temperature_obj(){
+	usb_dev_handle* lvr_winusb = pcsensor_open();
+	if(!lvr_winusb) return NULL;
+
+	time_t t;
+	t = time(NULL);
+	struct tm *local;
+	local = localtime(&t);
+	float tempc = pcsensor_get_temperature(lvr_winusb);
+	pcsensor_close(lvr_winusb);
+
+	Temperature *tempe = NULL;
+	tempe = (Temperature*)malloc(sizeof(Temperature));
+
+        tempe->celsius = tempc;
+        tempe->fahrenheit = (9.0 / 5.0 * tempc + 32.0);
+	tempe->time = t;
+	tempe->localtime =local;
+	return tempe;
+
+}
+
+
+
+
 #ifdef UNIT_TEST
 
 int main(){
@@ -382,7 +446,7 @@ int main(){
 	if(!lvr_winusb) return -1;
 	float tempc = pcsensor_get_temperature(lvr_winusb);
 	pcsensor_close(lvr_winusb);
-	printf("tempc=%f\n", tempc);
+	printf("Temperature in celsius=%f fahrenheit=%f\n", tempc, (9.0 / 5.0 * tempc + 32.0));
 	return 0;
 }
 
