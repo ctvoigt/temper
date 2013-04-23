@@ -291,6 +291,10 @@ static int get_temperature(usb_dev_handle *dev, float *tempC){
 	return 0;
 }
 
+void pcsensor_debug(int debug_value) {
+    debug = debug_value;
+}
+
 usb_dev_handle* pcsensor_open(){
 	usb_dev_handle *lvr_winusb = NULL;
 	char buf[256];

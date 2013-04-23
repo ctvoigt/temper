@@ -52,6 +52,8 @@ static int get_temperature(usb_dev_handle *dev, float *tempC);
 
 */
 
+void pcsensor_debug(int);
+
 usb_dev_handle* pcsensor_open();
 
 void pcsensor_close(usb_dev_handle* lvr_winusb);
