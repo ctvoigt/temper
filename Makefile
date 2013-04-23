@@ -10,5 +10,9 @@ temper: temper.c pcsensor.c pcsensor.h
 clean:
 	rm temper
 
-install:
-	echo TODO!
+install: all
+	install -o nobody -g temper -m 2555 temper /usr/local/bin
+	cp 60-temper.rules /etc/udev/rules.d
+
+uninstall:
+	-rm -rf /usr/local/bin/temper /etc/udev/rules.d/60-temper.rules
