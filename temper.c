@@ -12,7 +12,10 @@
 static float scale = 1.0287;
 static float offset = -0.85;
 
-int main(){
+int main(int argc, char **argv) {
+    if (argc > 1)
+        pcsensor_debug(1);
+
 	int passes = 0;
 	float tempc = 0.0000;
 	do {
@@ -28,11 +31,11 @@ int main(){
 			pcsensor_close(lvr_winusb);
 		}
 		++passes;
-	}
-	/* Read fails silently with a 0.0 return, so repeat until not zero
-	   or until we have read the same zero value 3 times (just in case
-	   temp is really dead on zero */
-	while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
+
+	  /* Read fails silently with a 0.0 return, so repeat until not zero
+	     or until we have read the same zero value 3 times (just in case
+	     temp is really dead on zero */
+	} while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4); 
 
 	if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
 		/* Apply calibrations */
@@ -44,7 +47,8 @@ int main(){
 		utc = gmtime(&t);
 		
 		char dt[80];
-		strftime(dt, 80, "%d-%b-%Y %H:%M", utc);
+		strftime(dt, 80, "%Y-%m-%d %H:%M:%S", utc); // YYYY-mm-dd HH:MM:SS
+		//strftime(dt, 80, "%d-%b-%Y %H:%M", utc);  // dd-mmm-YYYY HH:MM
 
 		printf("%s,%f\n", dt, tempc);
 		fflush(stdout);
