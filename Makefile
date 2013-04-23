@@ -15,10 +15,21 @@ group:
 
 install:
 	install temper /usr/local/bin
+	@echo
+	@echo "Remember to install rules:"
+	@echo "    make rules-install"
 
 uninstall:
 	rm -f /usr/local/bin/temper
+	rm -f  /etc/udev/rules.d/99-temper.rules
+	@echo
+	@echo "Remember to reload udev rules:"
+	@echo "udevcontrol reload_rules"
 	
 rules-install:	# must be superuser to do this
 	cp 99-temper.rules /etc/udev/rules.d 
-	udevadm trigger --action=change 
+	udevadm trigger --action=change
+	@echo
+	@echo "Check if rules are correctly reloded, try:"
+	@echo "udevcontrol reload_rules"
+	@echo "If rules cause trouble, reboot."
