@@ -13,6 +13,12 @@ clean:
 install: all
 	install -o nobody -g temper -m 2555 temper /usr/local/bin
 	cp 60-temper.rules /etc/udev/rules.d
+	@echo
+	@echo "Remember to reload udev rules:"
+	@echo "    udevcontrol reload_rules"
 
 uninstall:
 	-rm -rf /usr/local/bin/temper /etc/udev/rules.d/60-temper.rules
+	@echo
+	@echo "Remember to reload udev rules:"
+	@echo "    udevcontrol reload_rules"
