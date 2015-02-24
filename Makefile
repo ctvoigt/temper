@@ -15,3 +15,6 @@ install:
 
 uninstall:
 	rm -f /usr/local/bin/temper
+	
+rules-install:	# must be superuser to do this
+cp 99-tempsensor.rules /etc/udev/rules.d 
