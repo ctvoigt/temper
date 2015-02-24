@@ -10,7 +10,7 @@ Install intructions (Debian / Ubuntu)
 
 Install libusb-0.1.4 and dev package, plus build-essential 
 
-    sudo apt-get install build-essential libusb-0.1.4 libusb-0.1.4-dev
+    sudo apt-get install build-essential libusb-0.1.4 libusb-dev
 
 Compile
 
