@@ -8,20 +8,20 @@ Uses pcsensor.c by Michitaka Ohno, Juan Carlos Perez and Robert Kavaler
 Install intructions (Debian / Ubuntu)
 -------------------------------------
 
-1. Install libusb-0.1.4 and dev package, plus build-essential 
+Install libusb-0.1.4 and dev package, plus build-essential 
 
-    sudo apt-get install build-essential libusb-0.1.4 libusb-0.1.4-dev
+    sudo apt-get install build-essential libusb-0.1.4 libusb-dev
 
-2. Compile
+Compile
 
     make
 
-3. Install
+Install
 
     sudo make install
 
-4. Uninstall
-    
+Uninstall
+
     sudo make uninstall
 
 
