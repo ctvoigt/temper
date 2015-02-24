@@ -21,7 +21,7 @@ Install intructions (Debian / Ubuntu)
     sudo make install
 
 4. Uninstall
-    
+
     sudo make uninstall
 
 
