@@ -93,7 +93,7 @@ static int usb_detach(usb_dev_handle *lvr_winusb, int iInterface) {
 	return ret;
 } 
 
-static usb_dev_handle *find_lvr_winusb() {
+static int find_lvr_winusb() {
  
 	struct usb_bus *bus;
 	struct usb_device *dev;
@@ -116,7 +116,7 @@ static usb_dev_handle *find_lvr_winusb() {
 						if(debug){
 							printf("Could not open USB device\n");
 						}
-						return NULL;
+						break;
 					}
 					printf("\nDevice Filename: %s\n",dev->filename);
                                 	handles[countHandles++] = handle;
@@ -127,7 +127,7 @@ static usb_dev_handle *find_lvr_winusb() {
 			}
 		}
 	}
-	return handles[0];
+	return countHandles;
 }
 
 static usb_dev_handle* setup_libusb_access() {
@@ -143,13 +143,17 @@ static usb_dev_handle* setup_libusb_access() {
 	usb_find_devices();
 
  
-	if(!(lvr_winusb = find_lvr_winusb())) {
+ 
+     if(!find_lvr_winusb()) {
+
 		if(debug){
-			printf("Couldn't find the USB device, Exiting\n");
+			printf("Count of found USB Devices: %lu.\n", sizeof(handles));
 		}
-		return NULL;
-	}
-        
+                printf("Couldn't find the USB device, Exiting\n");
+                return NULL;
+        }
+
+	lvr_winusb = handles[0];        
         
 	usb_detach(lvr_winusb, INTERFACE1);
         
