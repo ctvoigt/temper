@@ -154,36 +154,7 @@ static usb_dev_handle* setup_libusb_access() {
         }
 
 	lvr_winusb = handles[0];        
-        
-	usb_detach(lvr_winusb, INTERFACE1);
-        
 
-	usb_detach(lvr_winusb, INTERFACE2);
-        
- 
-	if (usb_set_configuration(lvr_winusb, 0x01) < 0) {
-		if(debug){
-			printf("Could not set configuration 1\n");
-		}
-		return NULL;
-	}
- 
-
-	// Microdia tiene 2 interfaces
-	if (usb_claim_interface(lvr_winusb, INTERFACE1) < 0) {
-		if(debug){
-			printf("Could not claim interface\n");
-		}
-		return NULL;
-	}
- 
-	if (usb_claim_interface(lvr_winusb, INTERFACE2) < 0) {
-		if(debug){
-			printf("Could not claim interface\n");
-		}
-		return NULL;
-	}
- 
 	return lvr_winusb;
 }
  
@@ -307,13 +278,47 @@ static int get_temperature(usb_dev_handle *dev, float *tempC){
 }
 
 usb_dev_handle* pcsensor_open(){
-	usb_dev_handle *lvr_winusb = NULL;
+	usb_dev_handle* lvr_winusb;
 	char buf[256];
 	int i, ret;
 
-	if (!(lvr_winusb = setup_libusb_access())) {
+	if (!setup_libusb_access()) {
 		return NULL;
 	} 
+	lvr_winusb = handles[0];
+	        
+	usb_detach(lvr_winusb, INTERFACE1);
+        
+
+	usb_detach(lvr_winusb, INTERFACE2);
+        
+ 
+	if (usb_set_configuration(lvr_winusb, 0x01) < 0) {
+		if(debug){
+			printf("Could not set configuration 1\n");
+		}
+		return NULL;
+	}
+ 
+
+	// Microdia tiene 2 interfaces
+	if (usb_claim_interface(lvr_winusb, INTERFACE1) < 0) {
+		if(debug){
+			printf("Could not claim interface\n");
+		}
+		return NULL;
+	}
+ 
+	if (usb_claim_interface(lvr_winusb, INTERFACE2) < 0) {
+		if(debug){
+			printf("Could not claim interface\n");
+		}
+		return NULL;
+	}
+ 
+
+
+
 
 	switch(device_type(lvr_winusb)){
 	case 0:
