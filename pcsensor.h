@@ -28,7 +28,7 @@
 #include <string.h>
 #include <errno.h>
 #include <float.h>
-
+#include <time.h>
 /*
 static int device_type(usb_dev_handle *lvr_winusb);
 
@@ -57,6 +57,8 @@ usb_dev_handle* pcsensor_open();
 void pcsensor_close(usb_dev_handle* lvr_winusb);
 
 float pcsensor_get_temperature(usb_dev_handle* lvr_winusb);
+
+void run_sensor_with_params();
 
 //int find_lvr_winusb();
 

@@ -13,13 +13,14 @@ static float scale = 1.0287;
 static float offset = -0.85;
 
 int main(){
-	int passes = 0;
+	run_sensor_with_params();
+/*	int passes = 0;
 	float tempc = 0.0000;
 	do {
 		usb_dev_handle* lvr_winusb = pcsensor_open();
 
 		if (!lvr_winusb) {
-			/* Open fails sometime, sleep and try again */
+			// Open fails sometime, sleep and try again 
 			sleep(3);
 		}
 		else {
@@ -29,13 +30,13 @@ int main(){
 		}
 		++passes;
 	}
-	/* Read fails silently with a 0.0 return, so repeat until not zero
+	// Read fails silently with a 0.0 return, so repeat until not zero
 	   or until we have read the same zero value 3 times (just in case
-	   temp is really dead on zero */
+	   temp is really dead on zero 
 	while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
 
 	if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
-		/* Apply calibrations */
+		// Apply calibrations 
 		tempc = (tempc * scale) + offset;
 
 		struct tm *utc;
@@ -54,5 +55,7 @@ int main(){
 	else {
 		return 1;
 	}
+*/
 
+return 0;
 }
