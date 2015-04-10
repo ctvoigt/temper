@@ -1,7 +1,7 @@
-grabbyTEMPER
+grabbyTEMPer
 ============    
 
-A command line sensor logger for Temper1 devices
+A command line sensor logger for TEMPer1 devices
 
 Uses pcsensor.c by Michitaka Ohno, Juan Carlos Perez and Robert Kavaler
 
@@ -28,12 +28,12 @@ Uninstall
 Usage instructions
 ------------------
 
-Run log.sh, you may need to run this as root depending on your udev rules, i.e.
+Run log.sh
 
-    sudo ./log.sh
+    ./log.sh
 
 This will log the temperature every 5 seconds to stdout as a CSV stream which 
-you can pipe to a text stream and open in your favourite spreadsheet package 
+you can pipe to a text file and open in your favourite spreadsheet package 
 later. 
 
 
