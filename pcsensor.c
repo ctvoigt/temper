@@ -368,7 +368,7 @@ float pcsensor_get_temperature(usb_dev_handle* lvr_winusb){
 }
 
 int run_sensor_with_params() {
-	int passes = 0;
+	int passes,i,errorCode = 0;
 	float tempc = 0.0000;
 
 	if(debug) {
@@ -385,46 +385,48 @@ int run_sensor_with_params() {
 		return 1; // No Device found, exit program with error.
 	} 
 
-	usb_dev_handle* lvr_winusb = handles[0];
-	do {
-		pcsensor_open(lvr_winusb);
 
-		if (!lvr_winusb) {
-			// Open fails sometime, sleep and try again 
-			sleep(3);
+	for (i=0;i<countHandles;i++) {
+		usb_dev_handle* lvr_winusb = handles[i];
+		do {
+			pcsensor_open(lvr_winusb);
+
+			if (!lvr_winusb) {
+				// Open fails sometime, sleep and try again 
+				sleep(3);
+			}
+			else {
+		
+				tempc = pcsensor_get_temperature(lvr_winusb);
+				pcsensor_close(lvr_winusb);
+			}
+			++passes;
+		}
+		/* Read fails silently with a 0.0 return, so repeat until not zero
+		   or until we have read the same zero value 3 times (just in case
+		   temp is really dead on zero */
+		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
+
+		if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
+			// Apply calibrations 
+			tempc = (tempc * scale) + offset;
+	
+			struct tm *utc;
+			time_t t;
+			t = time(NULL);
+			utc = gmtime(&t);
+			
+			char dt[80];
+			strftime(dt, 80, "%d-%b-%Y %H:%M", utc);
+
+			printf("Sensor%d,%s,%f\n", i+1, dt, tempc);
+			fflush(stdout);
 		}
 		else {
-	
-			tempc = pcsensor_get_temperature(lvr_winusb);
-			pcsensor_close(lvr_winusb);
+		   errorCode = 1;
 		}
-		++passes;
 	}
-	/* Read fails silently with a 0.0 return, so repeat until not zero
-	   or until we have read the same zero value 3 times (just in case
-	   temp is really dead on zero */
-	while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
-
-	if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
-		// Apply calibrations 
-		tempc = (tempc * scale) + offset;
-
-		struct tm *utc;
-		time_t t;
-		t = time(NULL);
-		utc = gmtime(&t);
-		
-		char dt[80];
-		strftime(dt, 80, "%d-%b-%Y %H:%M", utc);
-
-		printf("%s,%f\n", dt, tempc);
-		fflush(stdout);
-
-		return 0;
-	}
-	else {
-		return 1;
-	}
+	return errorCode;
 }
 
 
