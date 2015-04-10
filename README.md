@@ -39,11 +39,15 @@ later.
 
 To allow non-root users access
 ------------------------------
-Automatically
+*automatically*
 
+    sudo make group
     sudo make rules-install
+    sudo usermod -aG temper <USER>
+
+Reboot to apply udev rules and group settings.
  
-Manually
+*manually*
 
 1. Add the udev rule set in /etc/udev/rules.d/ using the 99-temper.rules 
 2. Add a 'temper' group (using groupadd or edit the /etc/group file)
@@ -51,5 +55,9 @@ Manually
 4. Reload the udev rules 
     * udevcontrol reload_rules or sudo udevadm trigger
 5. Unplug and replug the TEMPer device
+
+*alternativilly*
+
+Use commented out lines from 99-temper.rules to allow all users reading the devices.
 
 

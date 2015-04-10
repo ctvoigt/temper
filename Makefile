@@ -10,8 +10,10 @@ temper: temper.c pcsensor.c pcsensor.h
 clean:
 	rm temper
 
-install:
+group:
 	groupadd temper 
+
+install:
 	install temper /usr/local/bin
 
 uninstall:

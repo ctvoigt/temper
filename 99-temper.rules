@@ -1,3 +1,10 @@
 # TEMPer1 USB thermometer
-ATTR{idVendor}=="1130", ATTR{idProduct}=="660c", OWNER="root", GROUP="temper", MODE="0660"
-ATTR{idVendor}=="0c45", ATTR{idProduct}=="7401", OWNER="root", GROUP="temper", MODE="0660"
+SUBSYSTEMS=="usb", ACTION=="add", ATTR{idVendor}=="1130", ATTR{idProduct}=="660c", OWNER="root", GROUP="temper", MODE="660"
+SUBSYSTEMS=="usb", ACTION=="add", ATTR{idVendor}=="0c45", ATTR{idProduct}=="7401", OWNER="root", GROUP="temper", MODE="660"
+
+## If you prefer a version without groups, use following instead.
+#SUBSYSTEMS=="usb", ACTION=="add", ATTR{idVendor}=="0c45", ATTR{idProduct}=="7401", MODE="666"
+#SUBSYSTEMS=="usb", ACTION=="add", ATTR{idVendor}=="1130", ATTR{idProduct}=="660c", MODE="666"
+
+
+## To search devpath upward, too: Use ATTRS istead of ATTR.
