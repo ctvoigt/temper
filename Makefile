@@ -11,6 +11,7 @@ clean:
 	rm temper
 
 install:
+	groupadd temper 
 	install temper /usr/local/bin
 
 uninstall:
@@ -18,3 +19,4 @@ uninstall:
 	
 rules-install:	# must be superuser to do this
 	cp 99-temper.rules /etc/udev/rules.d 
+	udevadm trigger --action=change 
