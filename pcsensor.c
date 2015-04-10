@@ -136,16 +136,7 @@ static int find_lvr_winusb() {
 static usb_dev_handle* setup_libusb_access() {
 	usb_dev_handle *lvr_winusb;
 
-	if(debug) {
-		usb_set_debug(255);
-	} else {
-		usb_set_debug(0);
-	}
-	usb_init();
-	usb_find_busses();
-	usb_find_devices();
 
- 
  
      if(!find_lvr_winusb()) {
 
@@ -281,7 +272,14 @@ static int get_temperature(usb_dev_handle *dev, float *tempC){
 }
 
 usb_dev_handle* pcsensor_open(){
+
+
+
 	usb_dev_handle* lvr_winusb;
+
+
+
+ 
 	char buf[256];
 	int i, ret;
 
@@ -392,6 +390,17 @@ float pcsensor_get_temperature(usb_dev_handle* lvr_winusb){
 void run_sensor_with_params() {
 	int passes = 0;
 	float tempc = 0.0000;
+
+	if(debug) {
+		usb_set_debug(255);
+	} else {
+		usb_set_debug(0);
+	}
+	usb_init();
+	usb_find_busses();
+	usb_find_devices();
+
+
 	do {
 		usb_dev_handle* lvr_winusb = pcsensor_open();
 
