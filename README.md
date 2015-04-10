@@ -55,6 +55,7 @@ Reboot to apply udev rules and group settings.
 4. Reload the udev rules 
     * udevcontrol reload_rules or sudo udevadm trigger
 5. Unplug and replug the TEMPer device
+6. If groups are not updated or udev still cases trouble (Does work with root permission, but not with user permissions), reboot.
 
 *alternativilly*
 
