@@ -9,11 +9,9 @@
 
 /* Calibration adjustments */
 /* See http://www.pitt-pladdy.com/blog/_20110824-191017_0100_TEMPer_under_Linux_perl_with_Cacti/ */
-static float scale = 1.0287;
-static float offset = -0.85;
+
 
 int main(){
-	run_sensor_with_params();
 /*	int passes = 0;
 	float tempc = 0.0000;
 	do {
@@ -57,5 +55,5 @@ int main(){
 	}
 */
 
-return 0;
+return run_sensor_with_params();
 }

@@ -32,6 +32,7 @@
 
 static float scale = 1.0287;
 static float offset = -0.85;
+int countHandles = 0;
 
 const static unsigned short vendor_id[] = { 
 	0x1130,
@@ -101,7 +102,6 @@ static int find_lvr_winusb() {
 	struct usb_bus *bus;
 	struct usb_device *dev;
 	int i;
- 	int countHandles;
 
 	memset(handles, 0, sizeof(handles)); 
 	countHandles = 0;
@@ -133,23 +133,16 @@ static int find_lvr_winusb() {
 	return countHandles;
 }
 
-static usb_dev_handle* setup_libusb_access() {
-	usb_dev_handle *lvr_winusb;
-
-
- 
+static int setup_libusb_access() {
      if(!find_lvr_winusb()) {
 
 		if(debug){
 			printf("Count of found USB Devices: %lu.\n", sizeof(handles));
 		}
                 printf("Couldn't find the USB device, Exiting\n");
-                return NULL;
+                return 0;
         }
-
-	lvr_winusb = handles[0];        
-
-	return lvr_winusb;
+	return 1;
 }
  
 static int ini_control_transfer(usb_dev_handle *dev) {
@@ -271,23 +264,10 @@ static int get_temperature(usb_dev_handle *dev, float *tempC){
 	return 0;
 }
 
-usb_dev_handle* pcsensor_open(){
-
-
-
-	usb_dev_handle* lvr_winusb;
-
-
-
- 
+int pcsensor_open(usb_dev_handle* lvr_winusb){
 	char buf[256];
 	int i, ret;
 
-	if (!setup_libusb_access()) {
-		return NULL;
-	} 
-	lvr_winusb = handles[0];
-	        
 	usb_detach(lvr_winusb, INTERFACE1);
         
 
@@ -298,7 +278,7 @@ usb_dev_handle* pcsensor_open(){
 		if(debug){
 			printf("Could not set configuration 1\n");
 		}
-		return NULL;
+		return 0;
 	}
  
 
@@ -307,14 +287,14 @@ usb_dev_handle* pcsensor_open(){
 		if(debug){
 			printf("Could not claim interface\n");
 		}
-		return NULL;
+		return 0;
 	}
  
 	if (usb_claim_interface(lvr_winusb, INTERFACE2) < 0) {
 		if(debug){
 			printf("Could not claim interface\n");
 		}
-		return NULL;
+		return 0;
 	}
  
 
@@ -341,7 +321,7 @@ usb_dev_handle* pcsensor_open(){
 	case 1:
 		if (ini_control_transfer(lvr_winusb) < 0) {
 			fprintf(stderr, "Failed to ini_control_transfer (device_type 1)");
-			return NULL;
+			return 0;
 		}
       
 		control_transfer(lvr_winusb, uTemperatura );
@@ -359,7 +339,7 @@ usb_dev_handle* pcsensor_open(){
 	if(debug){
 		printf("device_type=%d\n", device_type(lvr_winusb));
 	}
-	return lvr_winusb;
+	return 1;
 }
 
 void pcsensor_close(usb_dev_handle* lvr_winusb){
@@ -387,7 +367,7 @@ float pcsensor_get_temperature(usb_dev_handle* lvr_winusb){
 	return tempc;
 }
 
-void run_sensor_with_params() {
+int run_sensor_with_params() {
 	int passes = 0;
 	float tempc = 0.0000;
 
@@ -401,8 +381,13 @@ void run_sensor_with_params() {
 	usb_find_devices();
 
 
+	if (!setup_libusb_access()) {
+		return 1; // No Device found, exit program with error.
+	} 
+
+	usb_dev_handle* lvr_winusb = handles[0];
 	do {
-		usb_dev_handle* lvr_winusb = pcsensor_open();
+		pcsensor_open(lvr_winusb);
 
 		if (!lvr_winusb) {
 			// Open fails sometime, sleep and try again 
@@ -435,10 +420,10 @@ void run_sensor_with_params() {
 		printf("%s,%f\n", dt, tempc);
 		fflush(stdout);
 
-		//return 0;
+		return 0;
 	}
 	else {
-		//return 1;
+		return 1;
 	}
 }
 

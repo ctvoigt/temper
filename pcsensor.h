@@ -52,13 +52,13 @@ static int get_temperature(usb_dev_handle *dev, float *tempC);
 
 */
 
-usb_dev_handle* pcsensor_open();
+int pcsensor_open(usb_dev_handle* lvr_winusb);
 
 void pcsensor_close(usb_dev_handle* lvr_winusb);
 
 float pcsensor_get_temperature(usb_dev_handle* lvr_winusb);
 
-void run_sensor_with_params();
+int run_sensor_with_params();
 
 //int find_lvr_winusb();
 
