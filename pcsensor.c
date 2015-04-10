@@ -28,12 +28,18 @@
 #define INTERFACE1 (0x00)
 #define INTERFACE2 (0x01)
 #define SUPPORTED_DEVICES (2)
-#define MAX_DEV 4
+#define MAX_DEV 8
 
-static float scale = 1.0287;
-static float offset = -0.85;
-int countHandles = 0;
+/* Calibration adjustments */
+/* See http://www.pitt-pladdy.com/blog/_20110824-191017_0100_TEMPer_under_Linux_perl_with_Cacti/ */
+const static float scale = 1.0287;
+const static float offset = -0.85;
 
+/* further consts */
+const static int debug = 0;
+const static int reqIntLen=8;
+const static int reqBulkLen=8;
+const static int timeout=5000; /* timeout in ms */
 const static unsigned short vendor_id[] = { 
 	0x1130,
 	0x0c45
@@ -52,12 +58,8 @@ const static char uCmd2[] = {   10,   11,   12,   13,    0,    0,    1,    0 };
 const static char uCmd3[] = { 0x52,    0,    0,    0,    0,    0,    0,    0 };
 const static char uCmd4[] = { 0x54,    0,    0,    0,    0,    0,    0,    0 };
 
-const static int reqIntLen=8;
-const static int reqBulkLen=8;
-const static int timeout=5000; /* timeout in ms */
-
-static int debug=0;
-
+/* global vars */
+int countHandles = 0;
 static usb_dev_handle *handles[MAX_DEV];
 
 static int device_type(usb_dev_handle *lvr_winusb){
@@ -121,7 +123,8 @@ static int find_lvr_winusb() {
 						}
 						break;
 					}
-					printf("\nDevice Filename: %s\n",dev->filename);
+					if (debug)
+						printf("\nDevice Filename: %s\n",dev->filename);
                                 	handles[countHandles++] = handle;
 					if (i == MAX_DEV)
 						break;
