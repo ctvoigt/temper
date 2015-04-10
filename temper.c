@@ -16,6 +16,7 @@ Include Code here
 	3. Pass paramters run_sensor
 Further TODO
 	Implement different output formats, alongside CSV a better human readable version.
+	Implement selection of a special device.
 */
 
 return run_sensor_with_params();
