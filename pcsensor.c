@@ -384,7 +384,7 @@ float correct(float tempc) {
 	return (tempc * scale) + offset;
 }
 
-void print_temp(float tempc, int i) {
+void print_temp(float tempc, int sensorNumber) {
 	struct tm *utc;
 	time_t t;
 	t = time(NULL);
@@ -393,7 +393,7 @@ void print_temp(float tempc, int i) {
 	char dt[80];
 	strftime(dt, 80, "%d-%b-%Y %H:%M", utc);
 
-	printf("Sensor%d,%s,%f\n", i+1, dt, tempc);
+	printf("Sensor%d,%s,%f\n", sensorNumber, dt, tempc);
 	fflush(stdout);
 }
 
@@ -439,19 +439,8 @@ int run_sensor_with_params() {
 		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
 
 		if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
-			// Apply calibrations 
-			tempc = (tempc * scale) + offset;
-	
-			struct tm *utc;
-			time_t t;
-			t = time(NULL);
-			utc = gmtime(&t);
-			
-			char dt[80];
-			strftime(dt, 80, "%d-%b-%Y %H:%M", utc);
-
-			printf("Sensor%d,%s,%f\n", i+1, dt, tempc);
-			fflush(stdout);
+			tempc = correct(tempc);
+			print_temp(tempc, i+1);			
 		}
 		else {
 		   errorCode = 1;
