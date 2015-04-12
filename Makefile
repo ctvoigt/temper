@@ -14,7 +14,7 @@ group:
 	groupadd temper 
 
 install:
-	install temper /usr/local/bin
+	install -o nobody -g temper -m 2555 temper /usr/local/bin
 	@echo
 	@echo "Remember to install rules:"
 	@echo "    make rules-install"
@@ -33,3 +33,4 @@ rules-install:	# must be superuser to do this
 	@echo "Check if rules are correctly reloded, try:"
 	@echo "udevcontrol reload_rules"
 	@echo "If rules cause trouble, reboot."
+
