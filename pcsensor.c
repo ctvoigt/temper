@@ -239,6 +239,16 @@ static int interrupt_read_temperatura(usb_dev_handle *dev, float *tempC) {
 	}
     
 	temperature = (answer[3] & 0xFF) + (answer[2] << 8);
+	/* msb means the temperature is negative -- less than 0 Celsius -- and in 2'complement form.
+	* We can't be sure that the host uses 2's complement to store negative numbers
+	* so if the temperature is negative, we 'manually' get its magnitude
+	* by explicity getting it's 2's complement and then we return the negative of that.
+	*/
+
+	 if ((answer[2] & 0x80)!=0) {
+		 /* return the negative of magnitude of the temperature */
+		 temperature = -((temperature ^ 0xffff)+1);
+	 }
 	*tempC = temperature * (125.0 / 32000.0);
 	return 0;
 }
