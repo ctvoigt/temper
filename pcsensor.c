@@ -380,6 +380,24 @@ float pcsensor_get_temperature(usb_dev_handle* lvr_winusb){
 	return tempc;
 }
 
+float correct(float tempc) {
+	return (tempc * scale) + offset;
+}
+
+void print_temp(float tempc, int i) {
+	struct tm *utc;
+	time_t t;
+	t = time(NULL);
+	utc = gmtime(&t);
+	
+	char dt[80];
+	strftime(dt, 80, "%d-%b-%Y %H:%M", utc);
+
+	printf("Sensor%d,%s,%f\n", i+1, dt, tempc);
+	fflush(stdout);
+}
+
+
 int run_sensor_with_params() {
 	int passes,i,errorCode = 0;
 	float tempc = 0.0000;
