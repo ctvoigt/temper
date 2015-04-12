@@ -197,7 +197,7 @@ static int interrupt_read(usb_dev_handle *dev) {
  
 	int r,i;
 	char answer[reqIntLen];
-	bzero(answer, reqIntLen);
+	memset (answer,'0',reqIntLen);
     
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
@@ -220,7 +220,7 @@ static int interrupt_read_temperatura(usb_dev_handle *dev, float *tempC) {
  
 	int r,i, temperature;
 	char answer[reqIntLen];
-	bzero(answer, reqIntLen);
+	memset (answer,'0',reqIntLen);
     
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
