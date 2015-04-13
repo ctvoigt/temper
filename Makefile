@@ -1,11 +1,12 @@
 # Makefile for temperature reader
 CC=gcc
 CFLAGS=-Wall
+LIBS=-lusb -largtable2
 
 all: temper
 
 temper: temper.c pcsensor.c pcsensor.h
-	$(CC) $(CFLAGS) temper.c pcsensor.c -o temper -lusb
+	$(CC) $(CFLAGS) temper.c pcsensor.c -o temper $(LIBS)
 
 clean:
 	rm temper
