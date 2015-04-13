@@ -36,7 +36,6 @@ const static float scale = 1.0287;
 const static float offset = -0.85;
 
 /* further consts */
-const static int debug = 0;
 const static int reqIntLen=8;
 const static int reqBulkLen=8;
 const static int timeout=5000; /* timeout in ms */
@@ -59,6 +58,7 @@ const static char uCmd3[] = { 0x52,    0,    0,    0,    0,    0,    0,    0 };
 const static char uCmd4[] = { 0x54,    0,    0,    0,    0,    0,    0,    0 };
 
 /* global vars */
+static int debug = 0;
 int countHandles = 0;
 static usb_dev_handle *handles[MAX_DEV];
 
@@ -398,7 +398,7 @@ void print_temp(float tempc, int sensorNumber) {
 }
 
 
-int run_sensor_with_params() {
+int read_temper() {
 	int passes,i,errorCode = 0;
 	float tempc = 0.0000;
 
@@ -438,13 +438,13 @@ int run_sensor_with_params() {
 		   temp is really dead on zero */
 		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
 
-		if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
-			tempc = correct(tempc);
-			print_temp(tempc, i+1);			
-		}
-		else {
-		   errorCode = 1;
-		}
+			if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
+				tempc = correct(tempc);
+				print_temp(tempc, i+1);			
+			}
+			else {
+			   errorCode = 2; // Zero Read Error.
+			}
 	}
 	return errorCode;
 }

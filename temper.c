@@ -19,5 +19,5 @@ Further TODO
 	Implement selection of a special device.
 */
 
-return run_sensor_with_params();
+return read_temper();
 }
