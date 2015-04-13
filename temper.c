@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <argtable2.h>
 #include "pcsensor.h"
 
 int main(){

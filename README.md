@@ -8,9 +8,9 @@ Uses pcsensor.c by Michitaka Ohno, Juan Carlos Perez and Robert Kavaler
 Install intructions (Debian / Ubuntu)
 -------------------------------------
 
-Install libusb-0.1.4 and dev package, plus build-essential 
+Install libusb-0.1.4 and dev package, build-essential and libargtable2
 
-    sudo apt-get install build-essential libusb-0.1.4 libusb-dev
+    sudo apt-get install build-essential libusb-0.1.4 libusb-dev libargtable2-dev
 
 Compile
 
