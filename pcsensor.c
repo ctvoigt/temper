@@ -58,7 +58,7 @@ const static char uCmd3[] = { 0x52,    0,    0,    0,    0,    0,    0,    0 };
 const static char uCmd4[] = { 0x54,    0,    0,    0,    0,    0,    0,    0 };
 
 /* global vars */
-int debug = 0;
+int temperDebugMode = 0;
 int countHandles = 0;
 static usb_dev_handle *handles[MAX_DEV];
 
@@ -81,18 +81,18 @@ static int usb_detach(usb_dev_handle *lvr_winusb, int iInterface) {
 	ret = usb_detach_kernel_driver_np(lvr_winusb, iInterface);
 	if(ret) {
 		if(errno == ENODATA) {
-			if(debug) {
+			if(temperDebugMode) {
 				printf("Device already detached\n");
 			}
 		} else {
-			if(debug) {
+			if(temperDebugMode) {
 				printf("Detach failed: %s[%d]\n",
 					strerror(errno), errno);
 				printf("Continuing anyway\n");
 			}
 		}
 	} else {
-		if(debug) {
+		if(temperDebugMode) {
 			printf("detach successful\n");
 		}
 	}
@@ -113,17 +113,17 @@ static int find_lvr_winusb() {
 				if (dev->descriptor.idVendor == vendor_id[i] && 
 					dev->descriptor.idProduct == product_id[i] ) {
 					usb_dev_handle *handle;
-					if(debug) {
+					if(temperDebugMode) {
 						printf("lvr_winusb with Vendor Id: %x and Product Id: %x found.\n", vendor_id[i], product_id[i]);
 					}
 
 					if (!(handle = usb_open(dev))) {
-						if(debug){
+						if(temperDebugMode){
 							printf("Could not open USB device\n");
 						}
 						break;
 					}
-					if (debug)
+					if (temperDebugMode)
 						printf("\nDevice Filename: %s\n",dev->filename);
                                 	handles[countHandles++] = handle;
 					if (i == MAX_DEV)
@@ -139,7 +139,7 @@ static int find_lvr_winusb() {
 static int setup_libusb_access() {
      if(!find_lvr_winusb()) {
 
-		if(debug){
+		if(temperDebugMode){
 			printf("Count of found USB Devices: %lu.\n", sizeof(handles));
 		}
                 printf("Couldn't find the USB device, Exiting\n");
@@ -156,14 +156,14 @@ static int ini_control_transfer(usb_dev_handle *dev) {
 	r = usb_control_msg(dev, 0x21, 0x09, 0x0201, 0x00, (char *) question, 2, timeout);
 	if( r < 0 )
 	{
-		if(debug){
+		if(temperDebugMode){
 			printf("USB control write"); 
 		}
 		return -1;
 	}
 
 
-	if(debug) {
+	if(temperDebugMode) {
 		for (i=0;i<reqIntLen; i++) printf("%02x ",question[i] & 0xFF);
 		printf("\n");
 	}
@@ -180,13 +180,13 @@ static int control_transfer(usb_dev_handle *dev, const char *pquestion) {
 	r = usb_control_msg(dev, 0x21, 0x09, 0x0200, 0x01, (char *) question, reqIntLen, timeout);
 	if( r < 0 )
 	{
-		if(debug){
+		if(temperDebugMode){
 			printf("USB control write");
 		}
 		return -1;
 	}
 
-	if(debug) {
+	if(temperDebugMode) {
 		for (i=0;i<reqIntLen; i++) printf("%02x ",question[i]  & 0xFF);
 		printf("\n");
 	}
@@ -197,18 +197,17 @@ static int interrupt_read(usb_dev_handle *dev) {
  
 	int r,i;
 	char answer[reqIntLen];
-	//memset (answer,'0',reqIntLen);
-    	bzero(answer, reqIntLen);
+	memset (answer,'0',reqIntLen);
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
 	{
-		if(debug){
+		if(temperDebugMode){
 			printf("USB interrupt read");
 		}
 		return -1;
 	}
 
-	if(debug) {
+	if(temperDebugMode) {
 		for (i=0;i<reqIntLen; i++) printf("%02x ",answer[i]  & 0xFF);
     
 		printf("\n");
@@ -220,19 +219,18 @@ static int interrupt_read_temperatura(usb_dev_handle *dev, float *tempC) {
  
 	int r,i, temperature;
 	char answer[reqIntLen];
-	//memset (answer,'0',reqIntLen);
-    	bzero(answer, reqIntLen);
+	memset (answer,'0',reqIntLen);
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
 	{
-		if(debug){
+		if(temperDebugMode){
 			printf("USB interrupt read");
 		}
 		return -1;
 	}
 
 
-	if(debug) {
+	if(temperDebugMode) {
 		for (i=0;i<reqIntLen; i++) printf("%02x ",answer[i]  & 0xFF);
     
 		printf("\n");
@@ -288,7 +286,7 @@ int pcsensor_open(usb_dev_handle* lvr_winusb){
         
  
 	if (usb_set_configuration(lvr_winusb, 0x01) < 0) {
-		if(debug){
+		if(temperDebugMode){
 			printf("Could not set configuration 1\n");
 		}
 		return 0;
@@ -297,14 +295,14 @@ int pcsensor_open(usb_dev_handle* lvr_winusb){
 
 	// Microdia tiene 2 interfaces
 	if (usb_claim_interface(lvr_winusb, INTERFACE1) < 0) {
-		if(debug){
+		if(temperDebugMode){
 			printf("Could not claim interface\n");
 		}
 		return 0;
 	}
  
 	if (usb_claim_interface(lvr_winusb, INTERFACE2) < 0) {
-		if(debug){
+		if(temperDebugMode){
 			printf("Could not claim interface\n");
 		}
 		return 0;
@@ -320,7 +318,7 @@ int pcsensor_open(usb_dev_handle* lvr_winusb){
 		control_transfer(lvr_winusb, uCmd3 );
 		control_transfer(lvr_winusb, uCmd2 );
 		ret = get_data(lvr_winusb, buf, 256);
-		if(debug){	
+		if(temperDebugMode){	
 			printf("Other Stuff (%d bytes):\n", ret);
 			for(i = 0; i < ret; i++) {
 				printf(" %02x", buf[i] & 0xFF);
@@ -349,7 +347,7 @@ int pcsensor_open(usb_dev_handle* lvr_winusb){
 		break;
 	}
 
-	if(debug){
+	if(temperDebugMode){
 		printf("device_type=%d\n", device_type(lvr_winusb));
 	}
 	return 1;
@@ -402,7 +400,7 @@ int read_temper() {
 	int passes,i,errorCode = 0;
 	float tempc = 0.0000;
 
-	if(debug) {
+	if(temperDebugMode) {
 		usb_set_debug(255);
 	} else {
 		usb_set_debug(0);
