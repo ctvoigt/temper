@@ -29,6 +29,7 @@
 #define INTERFACE2 (0x01)
 #define SUPPORTED_DEVICES (2)
 #define MAX_DEV 8
+#define MAX_PASSES_PER_SENSOR 4
 
 /* Calibration adjustments */
 /* See http://www.pitt-pladdy.com/blog/_20110824-191017_0100_TEMPer_under_Linux_perl_with_Cacti/ */
@@ -411,36 +412,41 @@ int read_temper() {
 
 
 	if (!setup_libusb_access()) {
-		return 1; // No Device found, exit program with error.
+		if(temperDebugMode) {
+			printf("No Device found, exit program with error.");
+		}
+		return 1; // No Device found.
 	} 
 
-	usb_dev_handle* lvr_winusb;
 	for (i=0;i<countHandles;i++) {
-		lvr_winusb = handles[i];
-//		do {
+		do {
+			usb_dev_handle* lvr_winusb = handles[i];
 			pcsensor_open(lvr_winusb);
 
 			if (!lvr_winusb) {
 				// Open fails sometime, sleep and try again 
 				sleep(3);
-			}
-			else {
-		
-				tempc = pcsensor_get_temperature(lvr_winusb);
 				pcsensor_close(lvr_winusb);
 			}
+			else {
+				tempc = pcsensor_get_temperature(lvr_winusb);
+				//pcsensor_close(lvr_winusb);
+			}
 			++passes;
-//		}
+		}
 		/* Read fails silently with a 0.0 return, so repeat until not zero
 		   or until we have read the same zero value 3 times (just in case
 		   temp is really dead on zero */
-//		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
+		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= MAX_PASSES_PER_SENSOR);
 
-			if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
+			if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= MAX_PASSES_PER_SENSOR)) {
 				print_temp(correct(tempc), i+1);			
 			}
 			else {
-			   errorCode = 2; // Zero Read Error.
+				if(temperDebugMode) {
+					printf("Zero Read Error during reading device %d, tried MAX_PASSES_PER_SENSOR times", i);
+				}
+				errorCode = 2; // Zero Read Error.
 			}
 	}
 	return errorCode;
