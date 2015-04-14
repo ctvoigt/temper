@@ -58,7 +58,7 @@ const static char uCmd3[] = { 0x52,    0,    0,    0,    0,    0,    0,    0 };
 const static char uCmd4[] = { 0x54,    0,    0,    0,    0,    0,    0,    0 };
 
 /* global vars */
-static int debug = 0;
+int debug = 0;
 int countHandles = 0;
 static usb_dev_handle *handles[MAX_DEV];
 
@@ -197,8 +197,8 @@ static int interrupt_read(usb_dev_handle *dev) {
  
 	int r,i;
 	char answer[reqIntLen];
-	memset (answer,'0',reqIntLen);
-    
+	//memset (answer,'0',reqIntLen);
+    	bzero(answer, reqIntLen);
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
 	{
@@ -220,8 +220,8 @@ static int interrupt_read_temperatura(usb_dev_handle *dev, float *tempC) {
  
 	int r,i, temperature;
 	char answer[reqIntLen];
-	memset (answer,'0',reqIntLen);
-    
+	//memset (answer,'0',reqIntLen);
+    	bzero(answer, reqIntLen);
 	r = usb_interrupt_read(dev, 0x82, answer, reqIntLen, timeout);
 	if( r != reqIntLen )
 	{
@@ -416,10 +416,10 @@ int read_temper() {
 		return 1; // No Device found, exit program with error.
 	} 
 
-
+	usb_dev_handle* lvr_winusb;
 	for (i=0;i<countHandles;i++) {
-		usb_dev_handle* lvr_winusb = handles[i];
-		do {
+		lvr_winusb = handles[i];
+//		do {
 			pcsensor_open(lvr_winusb);
 
 			if (!lvr_winusb) {
@@ -432,15 +432,14 @@ int read_temper() {
 				pcsensor_close(lvr_winusb);
 			}
 			++passes;
-		}
+//		}
 		/* Read fails silently with a 0.0 return, so repeat until not zero
 		   or until we have read the same zero value 3 times (just in case
 		   temp is really dead on zero */
-		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
+//		while ((tempc > -0.0001 && tempc < 0.0001) || passes >= 4);
 
 			if (!((tempc > -0.0001 && tempc < 0.0001) || passes >= 4)) {
-				tempc = correct(tempc);
-				print_temp(tempc, i+1);			
+				print_temp(correct(tempc), i+1);			
 			}
 			else {
 			   errorCode = 2; // Zero Read Error.
